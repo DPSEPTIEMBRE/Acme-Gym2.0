@@ -21,46 +21,23 @@ import utilities.AbstractTest;
 @Transactional
 public class SocialIdentityServiceTest extends AbstractTest {
 
+	//The SUT
+	
 	@Autowired
 	private SocialIdentityService socialIdentityService;
 
-
-	//Caso de uso positivo crear una identidad social
-	@Test
-	public void testpositive0() {
-		template("trainer1", "trainer", "http://www.trainer.com", "trainer", null);
-	}
-
-	//Caso de uso negativo crear una identidad social sin nick
-	@Test
-	public void testnegative0() {
-		template("trainer1", null, "http://www.trainer.com", "trainer", ConstraintViolationException.class);
-	}
-
-	//Caso de uso fallo crear una identidad social con fallo en la url
-	@Test
-	public void testnegative1() {
-		template("trainer1", "trainer", "fallo", "trainer", ConstraintViolationException.class);
-	}
-
-	//Caso de uso drive
-	@Test
-	public void testDrive() {
-
-		template("trainer1", "trainer", "http://www.trainer.com", "trainer", null);
-		template("trainer1", "trainer", "http://www.trainer.com", "trainer", null);
-		template("trainer1", null, "http://www.trainer.com", "trainer", ConstraintViolationException.class);
-		template("trainer1", "trainer", "fallo", "trainer", ConstraintViolationException.class);
-		template("manager1", "trainer", "http://www.trainer.com", "trainer", ConstraintViolationException.class);
-		template("trainer1", "trainer", "http://www.trainer.com", null, ConstraintViolationException.class);
-
-	}
-
+	
+	//Templates
+	
+	/*
+	 * 11.1: A trainer can edit his or her curriculum, including social identities.
+	 */
 	protected void template(final String username, final String nick, final String link, final String nameNetwork, final Class<?> expected) {
 		Class<?> caught = null;
 
 		try {
 			authenticate(username);
+			
 			SocialIdentity socialIdentity = socialIdentityService.create();
 			socialIdentity.setNick(nick);
 			socialIdentity.setNameNetwork(nameNetwork);
@@ -77,4 +54,36 @@ public class SocialIdentityServiceTest extends AbstractTest {
 		checkExceptions(expected, caught);
 	}
 
+	//Drivers
+	
+	//Test #01: Correct creation. Expected true.
+	@Test
+	public void testpositive0() {
+		template("trainer1", "trainer", "http://www.trainer.com", "trainer", null);
+	}
+
+	//Test #02: Attempt to create with null nick. Expected false.
+	@Test
+	public void testnegative0() {
+		template("trainer1", null, "http://www.trainer.com", "trainer", ConstraintViolationException.class);
+	}
+
+	//Test #03: Attempt to create with invalid URL. Expected false.
+	@Test
+	public void testnegative1() {
+		template("trainer1", "trainer", "fallo", "trainer", ConstraintViolationException.class);
+	}
+
+	//Driver for several use cases.
+	@Test
+	public void testDrive() {
+
+		template("trainer1", "trainer", "http://www.trainer.com", "trainer", null);
+		template("trainer1", "trainer", "http://www.trainer.com", "trainer", null);
+		template("trainer1", null, "http://www.trainer.com", "trainer", ConstraintViolationException.class);
+		template("trainer1", "trainer", "fallo", "trainer", ConstraintViolationException.class);
+		template("manager1", "trainer", "http://www.trainer.com", "trainer", ConstraintViolationException.class);
+		template("trainer1", "trainer", "http://www.trainer.com", null, ConstraintViolationException.class);
+
+	}
 }
